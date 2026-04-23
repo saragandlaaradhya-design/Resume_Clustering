@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="section">
+
+<h1>Upload Resumes</h1>
+
+<form method="POST" enctype="multipart/form-data">
+<input type="file" name="resumes" multiple required>
+<br><br>
+<textarea name="job_desc" placeholder="Paste Job Description"></textarea>
+<br><br>
+<button class="btn">Cluster</button>
+</form>
+
+<h2>🏆 Top Candidates</h2>
+{% for name, score in ranked_resumes[:3] %}
+<p>{{ loop.index }}. {{ name }} - {{ score }}%</p>
+{% endfor %}
+
+<h2>Results</h2>
+
+{% for key, value in clusters.items() %}
+<div class="card">
+
+<h3>{{ value.name }}</h3>
+
+{% for file in value.files %}
+<p>
+<b>{{ file }}</b>  
+<a href="/uploads/{{ file }}" target="_blank">View</a>
+</p>
+
+<p>Score: {{ resume_scores[file] }}%</p>
+<p>Match: {{ resume_match[file] }}%</p>
+
+<ul>
+{% for skill in resume_skills[file] %}
+<li>{{ skill }}</li>
+{% endfor %}
+</ul>
+
+{% endfor %}
+
+</div>
+{% endfor %}
+
+<h2>Visualization</h2>
+<canvas id="chart"></canvas>
+
+</div>
+
+<script>
+const labels = JSON.parse('{{ labels | default([]) | tojson }}');
+const data = JSON.parse('{{ sizes | default([]) | tojson }}');
+
+if(labels.length){
+new Chart(document.getElementById('chart'), {
+type:'bar',
+data:{labels:labels,datasets:[{label:'Resumes',data:data}]}
+});
+}
+</script>
+
+</body>
+</html>
